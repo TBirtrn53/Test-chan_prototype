@@ -45,6 +45,23 @@ init python:
         choice_log.append({"text": text, "delta": delta})
         log_line("CHOICE", text)
 
+    def get_last_summary():
+        if archive_log:
+            return archive_log[-1].get("summary", "")
+        return ""
+
+    def build_scene_summary():
+        if choice_log:
+            parts = [
+                "{} ({:+d} affection)".format(entry["text"], entry["delta"])
+                for entry in choice_log
+            ]
+            choice_sentence = "Choice effects: {}.".format("; ".join(parts))
+        else:
+            choice_sentence = "No menu choices were recorded."
+        total_sentence = "Total affection after the exchange: {}.".format(affection)
+        return "{} {}".format(choice_sentence, total_sentence)
+
     def archive_scene(summary_text=""):
         # Copy current scene log into an archive record
         archive_log.append({
@@ -203,9 +220,11 @@ label typed_input:
 
     # --- compact game state for the AI ---
     $ recent = vn_state["choices"][-5:]
+    $ last_summary = get_last_summary()
     $ state_blob = "LANE=" + vn_state["lane"] + "\n" + \
                    "AFFECTION=" + str(affection) + "\n" + \
-                   "RECENT_CHOICES=" + ", ".join(recent)
+                   "RECENT_CHOICES=" + ", ".join(recent) + "\n" + \
+                   "PREVIOUS_SCENE_SUMMARY=" + last_summary
 
     $ ai_busy = True
     $ ai_result = {"reply":"", "affection_delta":0, "expression":"neutral", "tag":"other"}
@@ -265,10 +284,7 @@ No extra keys. No markdown. No backticks."""
     t "Affection: [affection]"
 
     python:
-        summary_lines = []
-        for entry in choice_log:
-            summary_lines.append("{} ({:+d} affection)".format(entry["text"], entry["delta"]))
-        summary_text = "Summary: " + "; ".join(summary_lines) + ". Total affection: {}.".format(affection)
+        summary_text = build_scene_summary()
 
     $ log_line("SYSTEM", summary_text)
     narrator "[summary_text]"
