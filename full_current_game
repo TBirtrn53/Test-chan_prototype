@@ -22,6 +22,7 @@ default vn_state = {
 default scene_id = "scene_1"
 default scene_log = []      # word-for-word lines for the current scene
 default archive_log = []    # list of past scenes (each is a dict)
+default choice_log = []     # list of choice effects for the current scene
 
 
 screen thinking_overlay():
@@ -40,18 +41,23 @@ init python:
         # kind: "CHOICE", "PLAYER", "TC" (Test-chan), "SYSTEM"
         scene_log.append({"kind": kind, "text": text})
 
-    def archive_scene():
+    def log_choice(text, delta):
+        choice_log.append({"text": text, "delta": delta})
+        log_line("CHOICE", text)
+
+    def archive_scene(summary_text=""):
         # Copy current scene log into an archive record
         archive_log.append({
             "scene_id": scene_id,
             "affection_end": affection,
             "lane": vn_state.get("lane", "unknown"),
             "transcript": list(scene_log),  # copy
-            "summary": "",
+            "summary": summary_text,
             "tags": []
         })
         # Clear for next scene
         scene_log[:] = []
+        choice_log[:] = []
 
     # Use a cert bundle you placed at game/cacert.pem
     os.environ["SSL_CERT_FILE"] = renpy.loader.transfn("cacert.pem")
@@ -166,13 +172,13 @@ label start:
             $ affection += 1
             $ vn_state["lane"] = "casual"
             $ vn_state["choices"].append("Responded casually")
-            $ log_line("CHOICE", "Be casual")
+            $ log_choice("Be casual", 1)
         "Be awkward":
             $ lane = "awkward"
             $ affection -= 1
             $ vn_state["lane"] = "awkward"
             $ vn_state["choices"].append("Responded awkwardly")
-            $ log_line("CHOICE", "Be awkward")
+            $ log_choice("Be awkward", -1)
 
     if lane == "casual":
         show testchan amused-smile at tc_base
@@ -257,5 +263,15 @@ No extra keys. No markdown. No backticks."""
 
     show testchan neutral at tc_base
     t "Affection: [affection]"
+
+    python:
+        summary_lines = []
+        for entry in choice_log:
+            summary_lines.append("{} ({:+d} affection)".format(entry["text"], entry["delta"]))
+        summary_text = "Summary: " + "; ".join(summary_lines) + ". Total affection: {}.".format(affection)
+
+    $ log_line("SYSTEM", summary_text)
+    narrator "[summary_text]"
+    $ archive_scene(summary_text)
 
     return
