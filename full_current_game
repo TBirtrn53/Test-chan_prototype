@@ -247,6 +247,7 @@ Return ONLY valid JSON in this exact shape:
 No extra keys. No markdown. No backticks."""
 
     show screen thinking_overlay
+    show testchan thinking at tc_base
 
     python:
         def _worker():
@@ -267,6 +268,7 @@ No extra keys. No markdown. No backticks."""
         $ waited += 0.1
 
     hide screen thinking_overlay
+    hide testchan thinking
 
     if waited >= 20.0 and ai_busy:
         $ ai_busy = False
