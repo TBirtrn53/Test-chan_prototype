@@ -222,13 +222,13 @@ label start:
 
     menu:
         "How do you respond?"
-        "Be casual":
+        "Yeah. Figured I'd stop by or whatever.":
             $ lane = "casual"
             $ affection += 1
             $ vn_state["lane"] = "casual"
             $ vn_state["choices"].append("Responded casually")
             $ log_choice("Be casual", 1)
-        "Be awkward":
+        "W- what's your cup size?":
             $ lane = "awkward"
             $ affection -= 1
             $ vn_state["lane"] = "awkward"
