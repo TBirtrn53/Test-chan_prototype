@@ -45,6 +45,7 @@ default scene_id = "scene_1"
 default scene_log = []      # word-for-word lines for the current scene
 default archive_log = []    # list of past scenes (each is a dict)
 default choice_log = []     # list of choice effects for the current scene
+default scene_context = ""
 
 
 screen thinking_overlay():
@@ -92,6 +93,26 @@ init python:
             elif kind == "PLAYER":
                 lines.append('Player said: "{}"'.format(text))
         lines.append("now, formulate your response")
+        return "\n".join(lines)
+
+    def build_archive_dialogue_exchange():
+        if not archive_log:
+            return ""
+        latest = archive_log[-1]
+        transcript = latest.get("transcript", [])
+        if not transcript:
+            return ""
+        lines = ["Previously, you and the player spoke."]
+        for entry in transcript:
+            kind = entry.get("kind")
+            text = entry.get("text", "").strip()
+            if not text:
+                continue
+            if kind == "TC":
+                lines.append('You said: "{}"'.format(text))
+            elif kind == "PLAYER":
+                lines.append('Player said: "{}"'.format(text))
+        lines.append("End of previous exchange.")
         return "\n".join(lines)
 
     def vet_player_message(text):
@@ -230,6 +251,7 @@ init python:
 label start:
     scene bg room
     show testchan neutral at tc_base
+    $ scene_context = "It's the first day of your senior year. your last class has just gotten out and the new kid (the player) has just come up to you to start a conversation."
 
     t "Oh. Hey."
     $ log_line("TC", "Oh. Hey.")
@@ -290,6 +312,7 @@ label typed_input:
                    "RECENT_CHOICES=" + ", ".join(recent) + "\n" + \
                    "PREVIOUS_SCENE_SUMMARY=" + last_summary
     $ dialogue_exchange = build_dialogue_exchange()
+    $ previous_exchange = build_archive_dialogue_exchange()
 
     $ ai_busy = True
     $ ai_result = {"reply":"", "affection_delta":0, "expression":"neutral", "tag":"other"}
@@ -305,6 +328,11 @@ long story, but you're hypnotized when you hear the word pineapple. hearing it m
 When the player says something bold or flirty, deflect or downplay it—but let subtle cracks show. If they tease you, tease back—but don’t admit they got to you. If they say something sincere, try to keep your composure—but maybe hesitate before replying. You hate showing weakness, but you're craving someone who can see through you.
 
 Don’t ever drop the act unless the player says something that deeply affects Test-chan's emotional walls. Even then, let it come through hesitation, not a complete personality shift.
+
+SCENE_CONTEXT:
+""" + scene_context + """
+
+""" + previous_exchange + """
 
 ---
 """ + dialogue_exchange + """
@@ -381,6 +409,7 @@ label scene_2:
     $ scene_id = "scene_2"
     scene bg park
     show testchan park neutral at tc_base
+    $ scene_context = "It's the second day of your senior year. Yesterday the new kid (the player) asked you out to the park"
 
     t "Alright. New setting, new rules. Try to keep up."
     t "Three choices, then we talk for real."
