@@ -245,6 +245,8 @@ label start:
     show testchan neutral at tc_base
     t "So. Why did you come over?"
 
+    $ next_scene = "scene_2"
+
 label typed_input:
     $ player_message = renpy.input("Type what you say. (One sentence.)", length=120)
     $ player_message = player_message.strip()
@@ -344,14 +346,7 @@ No extra keys. No markdown. No backticks."""
     narrator "[summary_text]"
     $ archive_scene(summary_text)
 
-    python:
-        summary_text = build_scene_summary()
-
-    $ log_line("SYSTEM", summary_text)
-    narrator "[summary_text]"
-    $ archive_scene(summary_text)
-
-    jump scene_2
+    jump expression next_scene
 
 
 
@@ -436,5 +431,9 @@ label scene_2:
 
     show testchan park neutral at tc_base
     t "Heart to heart. One sentence."
+    $ next_scene = "scene_2_after"
+    jump typed_input
+
+label scene_2_after:
     return
 
