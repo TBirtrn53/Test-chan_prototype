@@ -78,6 +78,16 @@ init python:
         for entry in choice_log:
             lines.append("{}: {:+d} affection".format(entry["text"], entry["delta"]))
         lines.append("Heart to heart: {:+d} affection".format(ai_result["affection_delta"]))
+        return "\n".join(lines)
+
+    def build_running_total_summary():
+        lines = ["–Running total–"]
+        if archive_log:
+            for index, entry in enumerate(archive_log, start=1):
+                lines.append("Day {} affection: {:+d}".format(index, entry.get("affection_end", 0)))
+            lines.append("Day {} affection: {:+d}".format(len(archive_log) + 1, affection))
+        else:
+            lines.append("Day 1 affection: {:+d}".format(affection))
         lines.append("Total affection: {}".format(affection))
         return "\n".join(lines)
 
@@ -394,9 +404,12 @@ No extra keys. No markdown. No backticks."""
 
     python:
         summary_text = build_scene_summary()
+        running_total_text = build_running_total_summary()
 
     $ log_line("SYSTEM", summary_text)
     narrator "[summary_text]"
+    $ log_line("SYSTEM", running_total_text)
+    narrator "[running_total_text]"
     $ archive_scene(summary_text)
 
     jump expression next_scene
