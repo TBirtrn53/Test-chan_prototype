@@ -262,7 +262,6 @@ init python:
 label start:
     scene bg room
     show testchan neutral at tc_base
-    $ scene_context = "It's the first day of your senior year. your last class has just gotten out and the new kid (the player) has just come up to you to start a conversation."
 
     t "Oh. Hey."
     $ log_line("TC", "Oh. Hey.")
@@ -341,15 +340,12 @@ When the player says something bold or flirty, deflect or downplay it—but let 
 Don’t ever drop the act unless the player says something that deeply affects Test-chan's emotional walls. Even then, let it come through hesitation, not a complete personality shift.
 
 SCENE_CONTEXT:
-""" + scene_context + """
-
-""" + previous_exchange + """
 
 ---
 """ + dialogue_exchange + """
 ---
 
-Reply under 3 sentences.
+Keep your reply under 3 sentences.
 
 GAME_STATE:
 """ + state_blob + """
@@ -414,8 +410,6 @@ No extra keys. No markdown. No backticks."""
     $ archive_scene(summary_text)
 
     jump scene_2
-
-
 
 
 
@@ -553,14 +547,17 @@ long story, but you're hypnotized when you hear the word pineapple. hearing it m
 
 When the player says something bold or flirty, deflect or downplay it—but let subtle cracks show. If they tease you, tease back—but don’t admit they got to you. If they say something sincere, try to keep your composure—but maybe hesitate before replying. You hate showing weakness, but you're craving someone who can see through you.
 
-Today is day two at the park. You’re a little more familiar with the player, so allow a slightly warmer edge under the competitiveness, but keep your guard up.
 
 SCENE_CONTEXT:
-""" + scene_context + """
+
+You and the player spoke yesterday. Here's what was said:
 
 """ + previous_exchange + """
 
----
+Today is day two at the park. You’re a little more familiar with the player, so allow a slightly warmer edge under the competitiveness, but keep your guard up.
+
+Here is the interaction you just had with the player today:
+
 """ + dialogue_exchange + """
 ---
 
@@ -632,3 +629,4 @@ No extra keys. No markdown. No backticks."""
 
 label scene_2_after:
     return
+
