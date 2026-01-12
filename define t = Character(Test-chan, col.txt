@@ -389,81 +389,81 @@ label scene_2:
 
     menu:
         "Route A, B, C, or D?"
-        "Ask her out":
-            $ log_line("PLAYER", "Ask her out")
-            $ log_choice("Ask her out", 1)
+        "Can I ask you out?":
+            $ log_line("PLAYER", "Can I ask you out?")
+            $ log_choice("Can I ask you out?", 1)
             show testchan park amused smile at tc_base
             t "Bold. You think you can handle that?"
             $ log_line("TC", "Bold. You think you can handle that?")
-        "Keep it friendly":
-            $ log_line("PLAYER", "Keep it friendly")
-            $ log_choice("Keep it friendly", 0)
+        "Let's keep it friendly.":
+            $ log_line("PLAYER", "Let's keep it friendly.")
+            $ log_choice("Let's keep it friendly.", 0)
             show testchan park neutral at tc_base
             t "Safe pick. Not bad."
             $ log_line("TC", "Safe pick. Not bad.")
-        "Make a rude joke":
-            $ log_line("PLAYER", "Make a rude joke")
-            $ log_choice("Make a rude joke", -1)
+        "Uh, that was a joke... kind of.":
+            $ log_line("PLAYER", "Uh, that was a joke... kind of.")
+            $ log_choice("Uh, that was a joke... kind of.", -1)
             show testchan park annoyed at tc_base
             t "Seriously? That's what you chose?"
             $ log_line("TC", "Seriously? That's what you chose?")
-        "Give her a compliment":
-            $ log_line("PLAYER", "Give her a compliment")
-            $ log_choice("Give her a compliment", 1)
+        "You look really good today.":
+            $ log_line("PLAYER", "You look really good today.")
+            $ log_choice("You look really good today.", 1)
             show testchan happy blush at tc_base
             t "Huh. That was unexpected."
             $ log_line("TC", "Huh. That was unexpected.")
 
     menu:
         "Route E, F, G, or H?"
-        "Challenge her":
-            $ log_line("PLAYER", "Challenge her")
-            $ log_choice("Challenge her", 1)
+        "Bet I can beat you.":
+            $ log_line("PLAYER", "Bet I can beat you.")
+            $ log_choice("Bet I can beat you.", 1)
             show testchan park amused smile at tc_base
             t "You keep surprising me."
             $ log_line("TC", "You keep surprising me.")
-        "Brag about yourself":
-            $ log_line("PLAYER", "Brag about yourself")
-            $ log_choice("Brag about yourself", -1)
+        "I'm kind of a big deal, you know.":
+            $ log_line("PLAYER", "I'm kind of a big deal, you know.")
+            $ log_choice("I'm kind of a big deal, you know.", -1)
             show testchan annoyed at tc_base
             t "That was kind of a miss."
             $ log_line("TC", "That was kind of a miss.")
-        "Change the subject":
-            $ log_line("PLAYER", "Change the subject")
-            $ log_choice("Change the subject", 0)
+        "Anyway, how's your day?":
+            $ log_line("PLAYER", "Anyway, how's your day?")
+            $ log_choice("Anyway, how's your day?", 0)
             show testchan park neutral at tc_base
             t "Neutral. I can live with that."
             $ log_line("TC", "Neutral. I can live with that.")
-        "Tease her back":
-            $ log_line("PLAYER", "Tease her back")
-            $ log_choice("Tease her back", 1)
+        "You're pretty cocky, huh?":
+            $ log_line("PLAYER", "You're pretty cocky, huh?")
+            $ log_choice("You're pretty cocky, huh?", 1)
             show testchan happy blush at tc_base
             t "Okay, I liked that one."
             $ log_line("TC", "Okay, I liked that one.")
 
     menu:
         "Route I, J, K, or L?"
-        "Play it cool":
-            $ log_line("PLAYER", "Play it cool")
-            $ log_choice("Play it cool", 0)
+        "I'm just here to hang out.":
+            $ log_line("PLAYER", "I'm just here to hang out.")
+            $ log_choice("I'm just here to hang out.", 0)
             show testchan park neutral at tc_base
             t "Alright. I see you."
             $ log_line("TC", "Alright. I see you.")
-        "Flirt a little":
-            $ log_line("PLAYER", "Flirt a little")
-            $ log_choice("Flirt a little", 1)
+        "So, do you always look this cute?":
+            $ log_line("PLAYER", "So, do you always look this cute?")
+            $ log_choice("So, do you always look this cute?", 1)
             show testchan park amused smile at tc_base
             t "You're on a roll."
             $ log_line("TC", "You're on a roll.")
-        "Push too hard":
-            $ log_line("PLAYER", "Push too hard")
-            $ log_choice("Push too hard", -1)
+        "Come on, you're into me.":
+            $ log_line("PLAYER", "Come on, you're into me.")
+            $ log_choice("Come on, you're into me.", -1)
             show testchan park annoyed at tc_base
             t "That didn't land."
             $ log_line("TC", "That didn't land.")
-        "Open up slightly":
-            $ log_line("PLAYER", "Open up slightly")
-            $ log_choice("Open up slightly", 1)
+        "I get nervous around you.":
+            $ log_line("PLAYER", "I get nervous around you.")
+            $ log_choice("I get nervous around you.", 1)
             show testchan happy blush at tc_base
             t "Hmph. Fine, that was good."
             $ log_line("TC", "Hmph. Fine, that was good.")
