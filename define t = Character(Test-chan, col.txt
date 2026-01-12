@@ -82,7 +82,7 @@ init python:
         return "\n".join(lines)
 
     def build_dialogue_exchange():
-        lines = ["You and the player just spoke."]
+        lines = ["You and the player just spoke. Here's what you said to each other."]
         for entry in scene_log:
             kind = entry.get("kind")
             text = entry.get("text", "").strip()
@@ -409,7 +409,7 @@ label scene_2:
     $ scene_id = "scene_2"
     scene bg park
     show testchan park neutral at tc_base
-    $ scene_context = "It's the second day of your senior year. Yesterday the new kid (the player) asked you out to the park"
+    $ scene_context = "It's the second day of your senior year. Yesterday the new kid (the player) asked you out to the park. Here is the conversation you had yesterday."
 
     t "Alright. New setting, new rules. Try to keep up."
     t "Three choices, then we talk for real."
