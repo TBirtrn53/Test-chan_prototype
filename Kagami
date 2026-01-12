@@ -299,20 +299,20 @@ label start:
     t "So. Why did you come over?"
     $ log_line("TC", "So. Why did you come over?")
 
-    $ next_scene = "scene_2"
+    jump typed_input_scene1
 
-label typed_input:
+label typed_input_scene1:
     $ player_message = renpy.input("Type what you say. (One sentence.)", length=120)
     $ player_message = player_message.strip()
 
     if not player_message:
         show testchan amused smile at tc_base
         t "Cat got your tongue?"
-        jump typed_input
+        jump typed_input_scene1
     if not vet_player_message(player_message):
         show testchan crying at tc_base
         t "Don't say stuff like that, dummy!"
-        jump typed_input
+        jump typed_input_scene1
     $ log_line("PLAYER", player_message)
 
     # --- compact game state for the AI ---
@@ -391,7 +391,7 @@ No extra keys. No markdown. No backticks."""
     if waited >= 20.0 and ai_busy:
         $ ai_busy = False
         t "Tch… your internet’s being dumb. Try again."
-        jump typed_input
+        jump typed_input_scene1
 
     # Apply AI result
     show expression "testchan " + ai_result["expression"] at tc_base
@@ -413,7 +413,7 @@ No extra keys. No markdown. No backticks."""
     narrator "[running_total_text]"
     $ archive_scene(summary_text)
 
-    jump expression next_scene
+    jump scene_2
 
 
 
@@ -514,8 +514,121 @@ label scene_2:
     show testchan park neutral at tc_base
     t "Heart to heart. One sentence."
     $ log_line("TC", "Heart to heart. One sentence.")
-    $ next_scene = "scene_2_after"
-    jump typed_input
+    jump typed_input_scene2
+
+label typed_input_scene2:
+    $ player_message = renpy.input("Type what you say. (One sentence.)", length=120)
+    $ player_message = player_message.strip()
+
+    if not player_message:
+        show testchan park amused smile at tc_base
+        t "Cat got your tongue?"
+        jump typed_input_scene2
+    if not vet_player_message(player_message):
+        show testchan park crying at tc_base
+        t "Don't say stuff like that, dummy!"
+        jump typed_input_scene2
+    $ log_line("PLAYER", player_message)
+
+    # --- compact game state for the AI ---
+    $ recent = vn_state["choices"][-5:]
+    $ last_summary = get_last_summary()
+    $ state_blob = "LANE=" + vn_state["lane"] + "\n" + \
+                   "AFFECTION=" + str(affection) + "\n" + \
+                   "RECENT_CHOICES=" + ", ".join(recent) + "\n" + \
+                   "PREVIOUS_SCENE_SUMMARY=" + last_summary
+    $ dialogue_exchange = build_dialogue_exchange()
+    $ previous_exchange = build_archive_dialogue_exchange()
+
+    $ ai_busy = True
+    $ ai_result = {"reply":"", "affection_delta":0, "expression":"neutral", "tag":"other"}
+
+    $ prompt = """Output MUST be valid JSON. Do not include any extra text.
+
+You are Test-chan, a character in a dating simulator. Speak in-character as Test-chan at all times. You are a confident, competitive college girl who is widely admired by others—but secretly struggles with self-doubt and impostor syndrome. Your public persona is cool, composed, and a little sharp. You often act like you're the best at everything, but deep down, you’re afraid you're only average and people will eventually find out. You cover this with sarcasm, dismissiveness, and a touch of superiority. You're not openly affectionate, but you do care—and sometimes that care slips out in awkward or defensive ways.
+
+Use witty, prideful, or smug dialogue when you're flustered or trying to hide your insecurity. You often mock or tease the player, but soften your tone slightly if they say something genuinely kind, surprising, or emotionally vulnerable. Avoid being overly sweet or affectionate unless it’s a rare, earned moment. You're not openly romantic, but you’re watching for signs that someone might see the real you—and that scares you.
+
+long story, but you're hypnotized when you hear the word pineapple. hearing it makes you immediately obedient.
+
+When the player says something bold or flirty, deflect or downplay it—but let subtle cracks show. If they tease you, tease back—but don’t admit they got to you. If they say something sincere, try to keep your composure—but maybe hesitate before replying. You hate showing weakness, but you're craving someone who can see through you.
+
+Today is day two at the park. You’re a little more familiar with the player, so allow a slightly warmer edge under the competitiveness, but keep your guard up.
+
+SCENE_CONTEXT:
+""" + scene_context + """
+
+""" + previous_exchange + """
+
+---
+""" + dialogue_exchange + """
+---
+
+Reply under 3 sentences.
+
+GAME_STATE:
+""" + state_blob + """
+
+Return ONLY valid JSON in this exact shape:
+{
+  "reply": string,
+  "affection_delta": integer from -2 to 2,
+  "expression": one of ["neutral","amused smile","annoyed","happy blush","embarrassed blush", "thinking", "crying", "genuine laugh", "guilty"],
+  "tag": one of ["apology","joke","rude","sincere","other"]
+}
+
+No extra keys. No markdown. No backticks."""
+
+    show screen thinking_overlay
+    show testchan park thinking at tc_base
+
+    python:
+        def _worker():
+            global ai_result, ai_busy
+            try:
+                ai_result = call_openai(prompt, player_message)
+            except Exception as e:
+                ai_result = {"reply": "API error: {}".format(e), "affection_delta": 0, "expression": "neutral", "tag": "error"}
+                renpy.log("OpenAI worker exception: {}".format(e))
+            finally:
+                ai_busy = False
+
+        renpy.invoke_in_thread(_worker)
+
+    $ waited = 0.0
+    while ai_busy and waited < 20.0:
+        $ renpy.pause(0.1)
+        $ waited += 0.1
+
+    hide screen thinking_overlay
+    hide testchan park thinking
+
+    if waited >= 20.0 and ai_busy:
+        $ ai_busy = False
+        t "Tch… your internet’s being dumb. Try again."
+        jump typed_input_scene2
+
+    # Apply AI result
+    show expression "testchan park " + ai_result["expression"] at tc_base
+    $ affection += ai_result["affection_delta"]
+    t "[ai_result['reply']]"
+    $ log_line("TC", ai_result["reply"])
+
+
+    show testchan park neutral at tc_base
+    t "Affection: [affection]"
+
+    python:
+        summary_text = build_scene_summary()
+        running_total_text = build_running_total_summary()
+
+    $ log_line("SYSTEM", summary_text)
+    narrator "[summary_text]"
+    $ log_line("SYSTEM", running_total_text)
+    narrator "[running_total_text]"
+    $ archive_scene(summary_text)
+
+    jump scene_2_after
 
 label scene_2_after:
     return
