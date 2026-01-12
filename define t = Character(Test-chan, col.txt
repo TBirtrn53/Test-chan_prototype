@@ -389,81 +389,81 @@ label scene_2:
 
     menu:
         "Route A, B, C, or D?"
-        "Route A":
-            $ log_line("PLAYER", "Route A")
-            $ log_choice("Route A", 1)
+        "Ask her out":
+            $ log_line("PLAYER", "Ask her out")
+            $ log_choice("Ask her out", 1)
             show testchan park amused smile at tc_base
             t "Bold. You think you can handle that?"
             $ log_line("TC", "Bold. You think you can handle that?")
-        "Route B":
-            $ log_line("PLAYER", "Route B")
-            $ log_choice("Route B", 0)
+        "Keep it friendly":
+            $ log_line("PLAYER", "Keep it friendly")
+            $ log_choice("Keep it friendly", 0)
             show testchan park neutral at tc_base
             t "Safe pick. Not bad."
             $ log_line("TC", "Safe pick. Not bad.")
-        "Route C":
-            $ log_line("PLAYER", "Route C")
-            $ log_choice("Route C", -1)
+        "Make a rude joke":
+            $ log_line("PLAYER", "Make a rude joke")
+            $ log_choice("Make a rude joke", -1)
             show testchan park annoyed at tc_base
             t "Seriously? That's what you chose?"
             $ log_line("TC", "Seriously? That's what you chose?")
-        "Route D":
-            $ log_line("PLAYER", "Route D")
-            $ log_choice("Route D", 1)
+        "Give her a compliment":
+            $ log_line("PLAYER", "Give her a compliment")
+            $ log_choice("Give her a compliment", 1)
             show testchan happy blush at tc_base
             t "Huh. That was unexpected."
             $ log_line("TC", "Huh. That was unexpected.")
 
     menu:
         "Route E, F, G, or H?"
-        "Route E":
-            $ log_line("PLAYER", "Route E")
-            $ log_choice("Route E", 1)
+        "Challenge her":
+            $ log_line("PLAYER", "Challenge her")
+            $ log_choice("Challenge her", 1)
             show testchan park amused smile at tc_base
             t "You keep surprising me."
             $ log_line("TC", "You keep surprising me.")
-        "Route F":
-            $ log_line("PLAYER", "Route F")
-            $ log_choice("Route F", -1)
+        "Brag about yourself":
+            $ log_line("PLAYER", "Brag about yourself")
+            $ log_choice("Brag about yourself", -1)
             show testchan annoyed at tc_base
             t "That was kind of a miss."
             $ log_line("TC", "That was kind of a miss.")
-        "Route G":
-            $ log_line("PLAYER", "Route G")
-            $ log_choice("Route G", 0)
+        "Change the subject":
+            $ log_line("PLAYER", "Change the subject")
+            $ log_choice("Change the subject", 0)
             show testchan park neutral at tc_base
             t "Neutral. I can live with that."
             $ log_line("TC", "Neutral. I can live with that.")
-        "Route H":
-            $ log_line("PLAYER", "Route H")
-            $ log_choice("Route H", 1)
+        "Tease her back":
+            $ log_line("PLAYER", "Tease her back")
+            $ log_choice("Tease her back", 1)
             show testchan happy blush at tc_base
             t "Okay, I liked that one."
             $ log_line("TC", "Okay, I liked that one.")
 
     menu:
         "Route I, J, K, or L?"
-        "Route I":
-            $ log_line("PLAYER", "Route I")
-            $ log_choice("Route I", 0)
+        "Play it cool":
+            $ log_line("PLAYER", "Play it cool")
+            $ log_choice("Play it cool", 0)
             show testchan park neutral at tc_base
             t "Alright. I see you."
             $ log_line("TC", "Alright. I see you.")
-        "Route J":
-            $ log_line("PLAYER", "Route J")
-            $ log_choice("Route J", 1)
+        "Flirt a little":
+            $ log_line("PLAYER", "Flirt a little")
+            $ log_choice("Flirt a little", 1)
             show testchan park amused smile at tc_base
             t "You're on a roll."
             $ log_line("TC", "You're on a roll.")
-        "Route K":
-            $ log_line("PLAYER", "Route K")
-            $ log_choice("Route K", -1)
+        "Push too hard":
+            $ log_line("PLAYER", "Push too hard")
+            $ log_choice("Push too hard", -1)
             show testchan park annoyed at tc_base
             t "That didn't land."
             $ log_line("TC", "That didn't land.")
-        "Route L":
-            $ log_line("PLAYER", "Route L")
-            $ log_choice("Route L", 1)
+        "Open up slightly":
+            $ log_line("PLAYER", "Open up slightly")
+            $ log_choice("Open up slightly", 1)
             show testchan happy blush at tc_base
             t "Hmph. Fine, that was good."
             $ log_line("TC", "Hmph. Fine, that was good.")
