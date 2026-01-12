@@ -1,0 +1,261 @@
+define t = Character("Test-chan", color="#030e9f")
+
+image testchan neutral = "images/testchan_neutral.png"
+image testchan amused-smile   = "images/testchan_amused-smile.png"
+image testchan annoyed = "images/testchan_annoyed.png"
+image testchan happy-blush   = "images/testchan_happy-blush.png"
+image testchan embarrassed-blush   = "images/testchan_embarrassed-blush.png"
+
+transform tc_base:
+    xalign 0.5
+    yalign -0.05
+    zoom 0.80
+
+default affection = 0
+default ai_busy = False
+default ai_result = {"reply":"", "affection_delta":0, "expression":"neutral", "tag":"other"}
+default vn_state = {
+    "lane": "unknown",
+    "affection": 0,
+    "choices": []
+}
+default scene_id = "scene_1"
+default scene_log = []      # word-for-word lines for the current scene
+default archive_log = []    # list of past scenes (each is a dict)
+
+
+screen thinking_overlay():
+    if ai_busy:
+        frame:
+            xalign 0.5
+            yalign 0.5
+            text "Test-chan is thinking..."
+
+init python:
+    import os
+    import json
+    import urllib.request
+
+    def log_line(kind, text):
+        # kind: "CHOICE", "PLAYER", "TC" (Test-chan), "SYSTEM"
+        scene_log.append({"kind": kind, "text": text})
+
+    def archive_scene():
+        # Copy current scene log into an archive record
+        archive_log.append({
+            "scene_id": scene_id,
+            "affection_end": affection,
+            "lane": vn_state.get("lane", "unknown"),
+            "transcript": list(scene_log),  # copy
+            "summary": "",
+            "tags": []
+        })
+        # Clear for next scene
+        scene_log[:] = []
+
+    # Use a cert bundle you placed at game/cacert.pem
+    os.environ["SSL_CERT_FILE"] = renpy.loader.transfn("cacert.pem")
+
+    def load_openai_key():
+        try:
+            with renpy.open_file("openai_key.txt") as f:
+                key = f.read()
+
+            if isinstance(key, bytes):
+                key = key.decode("utf-8", errors="ignore")
+
+            key = key.strip()
+            return key if key else None
+
+        except urllib.error.HTTPError as e:
+            body = e.read()
+            try:
+                body = body.decode("utf-8", errors="ignore")
+            except Exception:
+                pass
+            renpy.log("OpenAI HTTPError {} body={}".format(e.code, body))
+            return {"reply": "Request failed: HTTP {} (see log.txt)".format(e.code),
+                    "affection_delta": 0, "expression": "neutral", "tag": "error"}
+        except Exception as e:
+            renpy.log("OpenAI request failed: {}".format(e))
+            return {"reply": "Request failed: {}".format(e),
+                    "affection_delta": 0, "expression": "neutral", "tag": "error"}
+
+    def call_openai(test_chan_instructions, user_text):
+        api_key = load_openai_key()
+        if not api_key:
+            return {"reply": "No API key found. Add game/openai_key.txt", "affection_delta": 0, "expression": "neutral", "tag": "error"}
+
+        url = "https://api.openai.com/v1/responses"
+
+        payload = {
+            "model": "gpt-5-nano",
+            "instructions": test_chan_instructions,
+            "input": [
+                {"role": "user", "content": user_text}
+            ],
+        }
+
+        data = json.dumps(payload).encode("utf-8")
+
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                "Authorization": "Bearer " + api_key,
+                "Content-Type": "application/json",
+            },
+            method="POST"
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                out = json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            renpy.log("OpenAI request failed: {}".format(e))
+            return {"reply": "Request failed: {}".format(e), "affection_delta": 0, "expression": "neutral", "tag": "error"}
+
+        # Extract model text
+        text_parts = []
+        for item in out.get("output", []):
+            for c in item.get("content", []):
+                if c.get("type") == "output_text":
+                    text_parts.append(c.get("text", ""))
+
+        raw = ("\n".join(text_parts)).strip()
+        if not raw:
+            return {"reply": "(No text returned)", "affection_delta": 0, "expression": "neutral", "tag": "error"}
+
+        # Parse JSON
+        try:
+            obj = json.loads(raw)
+        except Exception as e:
+            renpy.log("JSON parse failed: {} | raw={}".format(e, raw))
+            return {"reply": raw, "affection_delta": 0, "expression": "neutral", "tag": "unparsed"}
+
+        # Validate + clamp
+        reply = str(obj.get("reply", "")).strip() or "(...)"
+        expr  = str(obj.get("expression", "neutral")).strip()
+        tag   = str(obj.get("tag", "other")).strip()
+
+        try:
+            delta = int(obj.get("affection_delta", 0))
+        except Exception:
+            delta = 0
+        if delta < -2: delta = -2
+        if delta > 2:  delta = 2
+
+        allowed_expr = {"neutral", "amused-smile", "annoyed", "happy-blush", "embarrassed-blush"}
+        if expr not in allowed_expr:
+            expr = "neutral"
+
+        return {"reply": reply, "affection_delta": delta, "expression": expr, "tag": tag}
+
+
+label start:
+    scene bg room
+    show testchan neutral at tc_base
+
+    t "Oh. Hey."
+    t "You’re actually here."
+
+    menu:
+        "How do you respond?"
+        "Be casual":
+            $ lane = "casual"
+            $ affection += 1
+            $ vn_state["lane"] = "casual"
+            $ vn_state["choices"].append("Responded casually")
+            $ log_line("CHOICE", "Be casual")
+        "Be awkward":
+            $ lane = "awkward"
+            $ affection -= 1
+            $ vn_state["lane"] = "awkward"
+            $ vn_state["choices"].append("Responded awkwardly")
+            $ log_line("CHOICE", "Be awkward")
+
+    if lane == "casual":
+        show testchan amused-smile at tc_base
+        t "Wow. Confident. I respect that."
+    else:
+        show testchan annoyed at tc_base
+        t "…Okay, that was a choice."
+
+    show testchan neutral at tc_base
+    t "So. Why did you come over?"
+
+label typed_input:
+    $ player_message = renpy.input("Type what you say. (One sentence.)", length=120)
+    $ player_message = player_message.strip()
+    $ log_line("PLAYER", player_message)
+
+    if not player_message:
+        show testchan amused-smile at tc_base
+        t "Cat got your tongue?"
+        jump typed_input
+
+
+    # --- compact game state for the AI ---
+    $ recent = vn_state["choices"][-5:]
+    $ state_blob = "LANE=" + vn_state["lane"] + "\n" + \
+                   "AFFECTION=" + str(affection) + "\n" + \
+                   "RECENT_CHOICES=" + ", ".join(recent)
+
+    $ ai_busy = True
+    $ ai_result = {"reply":"", "affection_delta":0, "expression":"neutral", "tag":"other"}
+
+    $ prompt = """Output MUST be valid JSON. Do not include any extra text.
+
+You are Test-chan, an 18-year-old college student and the tsundere love interest in a dating sim. Stay in character. Keep it TV-14 / soft-R. Be a *little* risqué when the moment calls for it Reply under 2 sentences.
+
+GAME_STATE:
+""" + state_blob + """
+
+Return ONLY valid JSON in this exact shape:
+{
+  "reply": string,
+  "affection_delta": integer from -2 to 2,
+  "expression": one of ["neutral","amused-smile","annoyed","happy-blush","embarrassed-blush"],
+  "tag": one of ["apology","joke","rude","sincere","other"]
+}
+
+No extra keys. No markdown. No backticks."""
+
+    show screen thinking_overlay
+
+    python:
+        def _worker():
+            global ai_result, ai_busy
+            try:
+                ai_result = call_openai(prompt, player_message)
+            except Exception as e:
+                ai_result = {"reply": "API error: {}".format(e), "affection_delta": 0, "expression": "neutral", "tag": "error"}
+                renpy.log("OpenAI worker exception: {}".format(e))
+            finally:
+                ai_busy = False
+
+        renpy.invoke_in_thread(_worker)
+
+    $ waited = 0.0
+    while ai_busy and waited < 20.0:
+        $ renpy.pause(0.1)
+        $ waited += 0.1
+
+    hide screen thinking_overlay
+
+    if waited >= 20.0 and ai_busy:
+        $ ai_busy = False
+        t "Tch… your internet’s being dumb. Try again."
+        jump typed_input
+
+    # Apply AI result
+    show expression "testchan " + ai_result["expression"] at tc_base
+    $ affection += ai_result["affection_delta"]
+    t "[ai_result['reply']]"
+    $ log_line("TC", ai_result["reply"])
+
+
+    show testchan neutral at tc_base
+    t "Affection: [affection]"
+
+    return
